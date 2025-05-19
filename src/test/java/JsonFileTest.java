@@ -14,7 +14,7 @@ public class JsonFileTest {
     @Test
     @DisplayName("Проверка json файла библиотеки")
     void jsonFileParsingTest() throws Exception {
-        try (InputStream is = cl.getResourceAsStream("library.json")) {
+        try (InputStream is = cl.getResourceAsStream("jsonSample.json")) {
             Library library = mapper.readValue(is, Library.class);
 
             assertEquals("City Central Library", library.getName());
