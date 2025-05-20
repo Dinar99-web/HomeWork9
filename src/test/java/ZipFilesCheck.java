@@ -11,6 +11,10 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import static org.asynchttpclient.util.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 @DisplayName("Проверка содержания файлов разного расширения внутри zip архива")
 public class ZipFilesCheck {
 
@@ -19,17 +23,20 @@ public class ZipFilesCheck {
     @Test
     @DisplayName("Проверка правильности строк в .pdf файле из архива")
     public void reedPDFFileInArchiveTest() throws Exception {
-
-        try (InputStream is = cl.getResourceAsStream("samples.zip"); ZipInputStream zis = new ZipInputStream(is)) {
+        try (InputStream is = cl.getResourceAsStream("samples.zip")) {
+            assertNotNull(is, "Архив samples.zip не найден");
+            ZipInputStream zis = new ZipInputStream(is);
+            boolean foundPdf = false;
             ZipEntry zipEntry;
             while ((zipEntry = zis.getNextEntry()) != null) {
                 if (zipEntry.getName().endsWith(".pdf")) {
+                    foundPdf = true;
                     PDF pdf = new PDF(zis);
-                    Assertions.assertEquals("Проверка PDF файла. \r\n", pdf.text);
+                    assertEquals("Проверка PDF файла. \r\n", pdf.text);
                 }
             }
+            assertTrue(foundPdf, "В архиве нет PDF-файла");
         }
-
     }
 
     @Test
@@ -41,7 +48,7 @@ public class ZipFilesCheck {
                 if (zipEntry.getName().endsWith(".xlsx")) {
                     XLS xls = new XLS(zis);
                     String actualResult1 = xls.excel.getSheetAt(0).getRow(1).getCell(1).getStringCellValue();
-                    Assertions.assertEquals("Проверка файла Excel", actualResult1);
+                    assertEquals("Проверка файла Excel", actualResult1);
                 }
             }
         }
@@ -56,7 +63,7 @@ public class ZipFilesCheck {
                 if (zipEntry.getName().endsWith(".csv")) {
                     CSVReader csvReader = new CSVReader(new InputStreamReader(zis));
                     List<String[]> data = csvReader.readAll();
-                    Assertions.assertEquals(1, data.size());
+                    assertEquals(1, data.size());
                     Assertions.assertArrayEquals(new String[]{"\uFEFFПроверка csv файла."}, data.get(0));
                 }
             }
