@@ -42,31 +42,41 @@ public class ZipFilesCheck {
     @Test
     @DisplayName("Проверка правильности строк в .xls файле из архива")
     public void reedXLSFileInArchiveTest() throws Exception {
-        try (InputStream is = cl.getResourceAsStream("samples.zip"); ZipInputStream zis = new ZipInputStream(is)) {
+        try (InputStream is = cl.getResourceAsStream("samples.zip")) {
+            assertNotNull(is, "Архив samples.zip не найден");
+            ZipInputStream zis = new ZipInputStream(is);
+            boolean foundXls = false;
             ZipEntry zipEntry;
             while ((zipEntry = zis.getNextEntry()) != null) {
                 if (zipEntry.getName().endsWith(".xlsx")) {
+                    foundXls = true;
                     XLS xls = new XLS(zis);
                     String actualResult1 = xls.excel.getSheetAt(0).getRow(1).getCell(1).getStringCellValue();
                     assertEquals("Проверка файла Excel", actualResult1);
                 }
             }
+            assertTrue(foundXls, "В архиве нет XLS/XLSX-файла");
         }
     }
 
     @Test
     @DisplayName("Проверка правильности строк в .csv файле из архива")
     public void reedCSVFileInArchiveTest() throws Exception {
-        try (InputStream is = cl.getResourceAsStream("samples.zip"); ZipInputStream zis = new ZipInputStream(is)) {
+        try (InputStream is = cl.getResourceAsStream("samples.zip")) {
+            assertNotNull(is, "Архив samples.zip не найден");
+            ZipInputStream zis = new ZipInputStream(is);
+            boolean foundCsv = false;
             ZipEntry zipEntry;
             while ((zipEntry = zis.getNextEntry()) != null) {
                 if (zipEntry.getName().endsWith(".csv")) {
+                    foundCsv = true;
                     CSVReader csvReader = new CSVReader(new InputStreamReader(zis));
                     List<String[]> data = csvReader.readAll();
                     assertEquals(1, data.size());
                     Assertions.assertArrayEquals(new String[]{"\uFEFFПроверка csv файла."}, data.get(0));
                 }
             }
+            assertTrue(foundCsv, "В архиве нет CSV-файла");
         }
     }
 }
